@@ -1,0 +1,28 @@
+name: Build
+on:
+  push:
+    branches:
+      - master
+env:
+  REGISTRY: ghcr.io/sulimanns
+  IMAGE_BASE_NAME: ${{ github.repository }}
+  ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  GITHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+jobs:
+  publish:
+    runs-on:  [ "self-hosted", "linux", "x64" ]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Publish
+        uses: ./.github/actions/publish
+        with:
+          access_token: ${{ env.ACCESS_TOKEN }}
+          github_user: ${{ env.GITHUB_USER }}
+          
+      - name: Tag snapshot
+        uses: tvdias/github-tagger@v0.0.1
+        with:
+          repo-token: ${{ env.ACCESS_TOKEN }}
+          tag: ${{ github.run_number }}

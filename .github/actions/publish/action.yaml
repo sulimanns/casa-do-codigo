@@ -1,0 +1,27 @@
+name: 'Publish'
+description: 'Publish images'
+inputs:
+  access_token:
+    description: 'Application version'
+    required: true
+  github_user:
+    description: 'Application version'
+    required: true
+runs:
+  using: "composite"
+  steps:
+
+    - run: |
+        echo ${{ inputs.access_token }} | docker login ghcr.io -u ${{ inputs.github_user }} --password-stdin
+        IMAGENAME="casadocodigo"
+        cd app/casadocodigo
+        docker build \
+          --file ./Dockerfile \
+          --no-cache=true \
+          -t ${{ env.REGISTRY }}/${IMAGENAME}:${{ github.run_number }} .
+        docker tag ${{ env.REGISTRY }}/${IMAGENAME}:${{ github.run_number }} ${{ env.REGISTRY }}/${IMAGENAME}:latest
+        docker push ${{ env.REGISTRY }}/${IMAGENAME}:${{ github.run_number }}
+        docker push ${{ env.REGISTRY }}/${IMAGENAME}:latest
+        cd ../../
+        
+      shell: bash
